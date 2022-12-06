@@ -6,8 +6,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvFileSource;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.*;
+import testdata.AuthCredentialsLogin;
+
+import java.util.List;
+import java.util.stream.Stream;
+
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selectors.withText;
@@ -36,6 +40,34 @@ public class AuthorizationPage {
         $("#password").setValue(password).pressEnter();
         $(byText("Products")).shouldHave(text(titleProducts));
     }
+
+    @ParameterizedTest(name = "Success authentification with Enum")
+    @EnumSource(AuthCredentialsLogin.class)
+    void validLoginInputWithEnumTest(AuthCredentialsLogin credentialsLogin){
+        $("#user-name").setValue(String.valueOf(credentialsLogin));
+        $("#password").setValue("secret_sauce").pressEnter();
+        $(byText("Products")).shouldHave(text("Products"));
+    }
+
+
+    static Stream<Arguments> validLoginWithStream (){
+        return Stream.of(
+                Arguments.of("standard_user", "secret_sauce", List.of("#item_1_img_link","item_0_img_link","#item_4_img_link",
+                        "#item_5_img_link", "#item_2_img_link", "#item_3_img_link")),
+                Arguments.of("performance_glitch_user", "secret_sauce", List.of("#item_1_img_link","item_0_img_link","#item_4_img_link",
+                        "#item_5_img_link", "#item_2_img_link", "#item_3_img_link"))
+        );
+    }
+    @MethodSource("validLoginWithStream")
+    @ParameterizedTest
+    void validLoginWithStream(String login, String password, List<String> prodcatIds){
+        $("#user-name").setValue(login);
+        $("#password").setValue(password).pressEnter();
+        for (String products: prodcatIds) { //Знаю, что в тестах циклы - это плохая практика, в данном случае реализовал, чтобы использовать работу с листами
+            $(products).isDisplayed();
+        }
+    }
+
 
     @ParameterizedTest(name = "Autentification validation. Credential: login = {0}, password = {1}. Error message = {2}")
     @CsvFileSource(
