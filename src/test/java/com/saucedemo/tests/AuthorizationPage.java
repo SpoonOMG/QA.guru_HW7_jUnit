@@ -41,12 +41,12 @@ public class AuthorizationPage {
         $(byText("Products")).shouldHave(text(titleProducts));
     }
 
-    @ParameterizedTest(name = "Success authentification with Enum")
+    @ParameterizedTest(name = "Unsuccess authentification with uppercase login. EnumSource")
     @EnumSource(AuthCredentialsLogin.class)
-    void validLoginInputWithEnumTest(AuthCredentialsLogin credentialsLogin){
+    void invalidLoginInputWithEnumTest(AuthCredentialsLogin credentialsLogin){
         $("#user-name").setValue(String.valueOf(credentialsLogin));
         $("#password").setValue("secret_sauce").pressEnter();
-        $(byText("Products")).shouldHave(text("Products"));
+        $(withText("Epic sadface:")).shouldHave(text("Epic sadface: Username and password do not match any user in this service"));
     }
 
 
